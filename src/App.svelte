@@ -1,3 +1,4 @@
+<!-- App.svelte -->
 <script>
   import { onMount } from "svelte";
 
@@ -330,186 +331,192 @@
   };
 </script>
 
-<div class="max-w-4xl mx-auto p-4 bg-black text-white">
-  <header class="mb-8 text-center">
-    <div class="flex justify-center mb-2">
-      {@html OscarIcon({ className: "text-yellow-500 h-12 w-12 mr-2" })}
-      <h1 class="text-4xl font-bold text-yellow-500 font-serif">
-        Oscar Predictions 2025
-      </h1>
-      {@html OscarIcon({ className: "text-yellow-500 h-12 w-12 ml-2" })}
-    </div>
-    <p class="text-gray-300 mb-6">
-      Make your predictions and see how many you get right!
-    </p>
-
-    <!-- Decorative element - stars -->
-    <div class="flex justify-center mb-6">
-      {#each Array(5) as _, i}
-        <span key={i} class="text-yellow-500 mx-1">★</span>
-      {/each}
-    </div>
-
-    <!-- Tabs -->
-    <div class="flex justify-center mb-4">
-      <button
-        on:click={() => (activeTab = "predict")}
-        class={`px-4 py-2 mx-1 rounded-md border-2 transition-all duration-300 ${
-          activeTab === "predict"
-            ? "bg-yellow-500 border-yellow-600 text-black font-bold"
-            : "bg-transparent border-yellow-500 text-yellow-500 hover:bg-yellow-500/10"
-        }`}
-      >
-        Make Predictions
-      </button>
-      <button
-        on:click={() => (activeTab = "results")}
-        class={`px-4 py-2 mx-1 rounded-md border-2 transition-all duration-300 ${
-          activeTab === "results"
-            ? "bg-yellow-500 border-yellow-600 text-black font-bold"
-            : "bg-transparent border-yellow-500 text-yellow-500 hover:bg-yellow-500/10"
-        }`}
-      >
-        Enter Results
-      </button>
-    </div>
-
-    <!-- Score display -->
-    {#if Object.keys(results).length > 0}
-      <div
-        class="mb-4 p-3 bg-yellow-500/20 border border-yellow-500 rounded-md inline-block"
-      >
-        <p class="font-bold text-yellow-500">
-          Your Score: {score} / {Object.keys(categories).length} correct ({Math.round(
-            (score / Object.keys(categories).length) * 100,
-          )}%)
-        </p>
+<div class="min-h-screen bg-black">
+  <div class="max-w-4xl mx-auto p-4 text-white">
+    <header class="mb-8 text-center">
+      <div class="flex justify-center mb-2">
+        {@html OscarIcon({ className: "text-yellow-500 h-12 w-12 mr-2" })}
+        <h1 class="text-4xl font-bold text-yellow-500 font-serif">
+          Oscar Predictions 2025
+        </h1>
+        {@html OscarIcon({ className: "text-yellow-500 h-12 w-12 ml-2" })}
       </div>
-    {/if}
+      <p class="text-gray-300 mb-6">
+        Make your predictions and see how many you get right!
+      </p>
 
-    <!-- Save status message -->
-    {#if savedStatus}
-      <div
-        class="mb-4 p-2 bg-yellow-500/20 text-yellow-500 border border-yellow-500 rounded-md"
-      >
-        {savedStatus}
+      <!-- Decorative element - stars -->
+      <div class="flex justify-center mb-6">
+        {#each Array(5) as _, i}
+          <span key={i} class="text-yellow-500 mx-1">★</span>
+        {/each}
       </div>
-    {/if}
-  </header>
 
-  <main>
-    <!-- Instructions -->
-    {#if activeTab === "predict"}
-      <div class="mb-6 p-4 bg-gray-900 border border-yellow-500/50 rounded-lg">
-        <h2 class="text-xl font-semibold mb-2 text-yellow-500">
-          Make Your Predictions
-        </h2>
-        <p class="text-gray-300">
-          Select who you think will win in each category. Your predictions will
-          be saved in your browser.
-        </p>
+      <!-- Tabs -->
+      <div class="flex justify-center mb-4">
         <button
-          on:click={savePredictions}
-          class="mt-3 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+          on:click={() => (activeTab = "predict")}
+          class={`px-4 py-2 mx-1 rounded-md border-2 transition-all duration-300 ${
+            activeTab === "predict"
+              ? "bg-yellow-500 border-yellow-600 text-black font-bold"
+              : "bg-transparent border-yellow-500 text-yellow-500 hover:bg-yellow-500/10"
+          }`}
         >
-          Save Predictions
+          Make Predictions
+        </button>
+        <button
+          on:click={() => (activeTab = "results")}
+          class={`px-4 py-2 mx-1 rounded-md border-2 transition-all duration-300 ${
+            activeTab === "results"
+              ? "bg-yellow-500 border-yellow-600 text-black font-bold"
+              : "bg-transparent border-yellow-500 text-yellow-500 hover:bg-yellow-500/10"
+          }`}
+        >
+          Enter Results
         </button>
       </div>
-    {:else}
-      <div class="mb-6 p-4 bg-gray-900 border border-yellow-500/50 rounded-lg">
-        <h2 class="text-xl font-semibold mb-2 text-yellow-500">
-          Enter the Winners
-        </h2>
-        <p class="text-gray-300">
-          After the Oscars, enter the actual winners to see how well you did.
-        </p>
-        <button
-          on:click={saveResults}
-          class="mt-3 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
-        >
-          Save Results
-        </button>
-      </div>
-    {/if}
 
-    <!-- Categories -->
-    {#each Object.entries(categories) as [categoryKey, categoryData]}
-      <div
-        class="mb-6 p-4 bg-gray-900 border border-gray-800 rounded-lg shadow-lg"
-      >
-        <div class="flex items-center mb-3">
-          {@html OscarIcon({ className: "text-yellow-500 h-5 w-5 mr-2" })}
-          <h3 class="text-xl font-medium text-yellow-500">
-            {categoryData.title}
-          </h3>
+      <!-- Score display -->
+      {#if Object.keys(results).length > 0}
+        <div
+          class="mb-4 p-3 bg-yellow-500/20 border border-yellow-500 rounded-md inline-block"
+        >
+          <p class="font-bold text-yellow-500">
+            Your Score: {score} / {Object.keys(categories).length} correct ({Math.round(
+              (score / Object.keys(categories).length) * 100,
+            )}%)
+          </p>
         </div>
-        <div class="space-y-3">
-          {#each categoryData.nominees as nominee, idx}
-            <div
-              class="flex items-center p-2 hover:bg-gray-800 rounded-md transition-colors"
-            >
-              <input
-                type="radio"
-                id={`${activeTab}-${categoryKey}-${idx}`}
-                name={`${activeTab}-${categoryKey}`}
-                value={nominee}
-                checked={activeTab === "predict"
-                  ? predictions[categoryKey] === nominee
-                  : results[categoryKey] === nominee}
-                on:change={() => {
-                  if (activeTab === "predict") {
-                    handlePredictionChange(categoryKey, nominee);
-                  } else {
-                    handleResultChange(categoryKey, nominee);
-                  }
-                }}
-                class="mr-3 accent-yellow-500 h-4 w-4"
-              />
-              <label
-                for={`${activeTab}-${categoryKey}-${idx}`}
-                class={`flex-1 cursor-pointer ${
-                  activeTab === "results" &&
-                  predictions[categoryKey] === nominee &&
-                  results[categoryKey] === nominee
-                    ? "font-bold text-yellow-500"
-                    : "text-gray-200"
-                }`}
+      {/if}
+
+      <!-- Save status message -->
+      {#if savedStatus}
+        <div
+          class="mb-4 p-2 bg-yellow-500/20 text-yellow-500 border border-yellow-500 rounded-md"
+        >
+          {savedStatus}
+        </div>
+      {/if}
+    </header>
+
+    <main>
+      <!-- Instructions -->
+      {#if activeTab === "predict"}
+        <div
+          class="mb-6 p-4 bg-gray-900 border border-yellow-500/50 rounded-lg"
+        >
+          <h2 class="text-xl font-semibold mb-2 text-yellow-500">
+            Make Your Predictions
+          </h2>
+          <p class="text-gray-300">
+            Select who you think will win in each category. Your predictions
+            will be saved in your browser.
+          </p>
+          <button
+            on:click={savePredictions}
+            class="mt-3 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+          >
+            Save Predictions
+          </button>
+        </div>
+      {:else}
+        <div
+          class="mb-6 p-4 bg-gray-900 border border-yellow-500/50 rounded-lg"
+        >
+          <h2 class="text-xl font-semibold mb-2 text-yellow-500">
+            Enter the Winners
+          </h2>
+          <p class="text-gray-300">
+            After the Oscars, enter the actual winners to see how well you did.
+          </p>
+          <button
+            on:click={saveResults}
+            class="mt-3 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+          >
+            Save Results
+          </button>
+        </div>
+      {/if}
+
+      <!-- Categories -->
+      {#each Object.entries(categories) as [categoryKey, categoryData]}
+        <div
+          class="mb-6 p-4 bg-gray-900 border border-gray-800 rounded-lg shadow-lg"
+        >
+          <div class="flex items-center mb-3">
+            {@html OscarIcon({ className: "text-yellow-500 h-5 w-5 mr-2" })}
+            <h3 class="text-xl font-medium text-yellow-500">
+              {categoryData.title}
+            </h3>
+          </div>
+          <div class="space-y-3">
+            {#each categoryData.nominees as nominee, idx}
+              <div
+                class="flex items-center p-2 hover:bg-gray-800 rounded-md transition-colors"
               >
-                {nominee}
-                {#if activeTab === "results" && predictions[categoryKey] === nominee && results[categoryKey] === nominee}
-                  <span> ★ (correct)</span>
-                {/if}
-              </label>
-            </div>
-          {/each}
+                <input
+                  type="radio"
+                  id={`${activeTab}-${categoryKey}-${idx}`}
+                  name={`${activeTab}-${categoryKey}`}
+                  value={nominee}
+                  checked={activeTab === "predict"
+                    ? predictions[categoryKey] === nominee
+                    : results[categoryKey] === nominee}
+                  on:change={() => {
+                    if (activeTab === "predict") {
+                      handlePredictionChange(categoryKey, nominee);
+                    } else {
+                      handleResultChange(categoryKey, nominee);
+                    }
+                  }}
+                  class="mr-3 accent-yellow-500 h-4 w-4"
+                />
+                <label
+                  for={`${activeTab}-${categoryKey}-${idx}`}
+                  class={`flex-1 cursor-pointer ${
+                    activeTab === "results" &&
+                    predictions[categoryKey] === nominee &&
+                    results[categoryKey] === nominee
+                      ? "font-bold text-yellow-500"
+                      : "text-gray-200"
+                  }`}
+                >
+                  {nominee}
+                  {#if activeTab === "results" && predictions[categoryKey] === nominee && results[categoryKey] === nominee}
+                    <span> ★ (correct)</span>
+                  {/if}
+                </label>
+              </div>
+            {/each}
+          </div>
         </div>
-      </div>
-    {/each}
-  </main>
-
-  <footer class="mt-12 pt-6 border-t border-gray-800 text-center">
-    <button
-      on:click={resetAll}
-      class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-    >
-      Reset All Data
-    </button>
-
-    <!-- Decorative element - stars -->
-    <div class="flex justify-center my-6">
-      {#each Array(5) as _, i}
-        <span key={i} class="text-yellow-500 mx-1">★</span>
       {/each}
-    </div>
+    </main>
 
-    <p class="mt-2 text-gray-400 text-sm">
-      Oscar predictions data is stored locally in your browser.
-      <br />
-      No data is sent to any server.
-    </p>
+    <footer class="mt-12 pt-6 border-t border-gray-800 text-center">
+      <button
+        on:click={resetAll}
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+      >
+        Reset All Data
+      </button>
 
-    <p class="mt-6 text-yellow-500 text-sm font-serif">
-      97th Academy Awards • March 2, 2025
-    </p>
-  </footer>
+      <!-- Decorative element - stars -->
+      <div class="flex justify-center my-6">
+        {#each Array(5) as _, i}
+          <span key={i} class="text-yellow-500 mx-1">★</span>
+        {/each}
+      </div>
+
+      <p class="mt-2 text-gray-400 text-sm">
+        Oscar predictions data is stored locally in your browser.
+        <br />
+        No data is sent to any server.
+      </p>
+
+      <p class="mt-6 text-yellow-500 text-sm font-serif">
+        97th Academy Awards • March 2, 2025
+      </p>
+    </footer>
+  </div>
 </div>
