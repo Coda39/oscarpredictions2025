@@ -16,8 +16,47 @@
   let score = 0;
   let activeTab = "predict";
   let savedStatus = "";
+  let timeRemaining = {
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    expired: false,
+  };
 
-  // Load data from localStorage on initial render
+  // Calculate time remaining to the Oscars
+  const updateCountdown = () => {
+    const now = new Date();
+    const oscarsDate = new Date("2025-03-02T19:00:00-08:00"); // March 2nd, 2025, 7:00 PM Pacific Time
+
+    const totalSeconds = Math.max(0, Math.floor((oscarsDate - now) / 1000));
+
+    if (totalSeconds <= 0) {
+      timeRemaining = {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        expired: true,
+      };
+      return;
+    }
+
+    const days = Math.floor(totalSeconds / (60 * 60 * 24));
+    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+
+    timeRemaining = {
+      days,
+      hours,
+      minutes,
+      seconds,
+      expired: false,
+    };
+  };
+
+  // Load data from localStorage on initial render and start countdown
   onMount(() => {
     const savedPredictions = localStorage.getItem("oscarPredictions2025");
     const savedResults = localStorage.getItem("oscarResults2025");
@@ -30,6 +69,15 @@
       results = JSON.parse(savedResults);
       calculateScore(JSON.parse(savedPredictions), JSON.parse(savedResults));
     }
+
+    // Initialize countdown
+    updateCountdown();
+
+    // Update countdown every second
+    const countdownInterval = setInterval(updateCountdown, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(countdownInterval);
   });
 
   // Calculate score when results change
@@ -72,6 +120,30 @@
       ...results,
       [category]: nominee,
     };
+  };
+
+  // Clear predictions
+  const clearPredictions = () => {
+    if (
+      window.confirm("Are you sure you want to clear all your predictions?")
+    ) {
+      localStorage.removeItem("oscarPredictions2025");
+      predictions = {};
+      score = 0;
+      savedStatus = "Predictions have been cleared!";
+      setTimeout(() => (savedStatus = ""), 3000);
+    }
+  };
+
+  // Clear results
+  const clearResults = () => {
+    if (window.confirm("Are you sure you want to clear all the results?")) {
+      localStorage.removeItem("oscarResults2025");
+      results = {};
+      score = 0;
+      savedStatus = "Results have been cleared!";
+      setTimeout(() => (savedStatus = ""), 3000);
+    }
   };
 
   // Reset all data
@@ -345,11 +417,28 @@
         Make your predictions and see how many you get right!
       </p>
 
-      <!-- Decorative element - stars -->
-      <div class="flex justify-center mb-6">
-        {#each Array(5) as _, i}
-          <span key={i} class="text-yellow-500 mx-1">★</span>
-        {/each}
+      <!-- Countdown timer to the Oscars -->
+      <div
+        class="flex flex-col items-center justify-center mb-6 p-3 bg-yellow-500/10 border border-yellow-500/50 rounded-lg"
+      >
+        {#if timeRemaining.expired}
+          <div class="text-center">
+            <p class="text-yellow-500 font-bold text-xl mb-2">
+              The Oscars are happening now!
+            </p>
+          </div>
+        {:else}
+          <p class="text-sm text-yellow-400 mb-1">
+            Countdown to the 97th Academy Awards
+          </p>
+          <p class="text-yellow-500 font-bold text-xl">
+            {timeRemaining.days}d {timeRemaining.hours}h {timeRemaining.minutes}m
+            {timeRemaining.seconds}s
+          </p>
+          <p class="text-xs text-gray-400 mt-1">
+            March 2nd, 2025 at 7:00 PM (US/Pacific)
+          </p>
+        {/if}
       </div>
 
       <!-- Tabs -->
@@ -412,12 +501,20 @@
             Select who you think will win in each category. Your predictions
             will be saved in your browser.
           </p>
-          <button
-            on:click={savePredictions}
-            class="mt-3 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
-          >
-            Save Predictions
-          </button>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button
+              on:click={savePredictions}
+              class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+            >
+              Save Predictions
+            </button>
+            <button
+              on:click={clearPredictions}
+              class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Clear Predictions
+            </button>
+          </div>
         </div>
       {:else}
         <div
@@ -429,12 +526,20 @@
           <p class="text-gray-300">
             After the Oscars, enter the actual winners to see how well you did.
           </p>
-          <button
-            on:click={saveResults}
-            class="mt-3 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
-          >
-            Save Results
-          </button>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button
+              on:click={saveResults}
+              class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+            >
+              Save Results
+            </button>
+            <button
+              on:click={clearResults}
+              class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Clear Results
+            </button>
+          </div>
         </div>
       {/if}
 
@@ -494,11 +599,12 @@
     </main>
 
     <footer class="mt-12 pt-6 border-t border-gray-800 text-center">
+      <!-- Contextual save button based on active tab -->
       <button
-        on:click={resetAll}
-        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        on:click={activeTab === "predict" ? savePredictions : saveResults}
+        class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
       >
-        Reset All Data
+        {activeTab === "predict" ? "Save Predictions" : "Save Results"}
       </button>
 
       <!-- Decorative element - stars -->
